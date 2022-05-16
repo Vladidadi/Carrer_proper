@@ -84,17 +84,18 @@ pygame.display.set_caption("Carrer")
 class Background(pygame.sprite.Sprite):
       def __init__(self):
             super().__init__()
-            self.bgimage = pygame.image.load("./RESOURCES/BACKGROUND/wallpaper.png").convert_alpha()
+            self.bgimage = pygame.image.load("./RESOURCES/BACKGROUND/background_scroll.png").convert_alpha()
             self.bgY = 0
             self.bgX = 0
       def render(self):
+        #   self.bgX -= .25
           displaysurface.blit(self.bgimage, (self.bgX, self.bgY))
 
 class Ground(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("./RESOURCES/GROUND/ground.png").convert_alpha()
-        self.rect = self.image.get_rect(center = (400, 600))
+        self.image = pygame.image.load("./RESOURCES/GROUND/ground_full.png").convert_alpha()
+        self.rect = self.image.get_rect(center = (950, 1160))
 
     def render(self):
         displaysurface.blit(self.image, (self.rect.x, self.rect.y))
@@ -109,7 +110,7 @@ class Castle(pygame.sprite.Sprite):
 
     def update(self):
         if self.hide == False:
-            displaysurface.blit(self.image, (400,270))
+            displaysurface.blit(self.image, (900,800))
 
 
 
@@ -145,36 +146,41 @@ class EventHandler():
 
     def stage_handler(self):
         #tkinter stage selection
-        self.root = Tk()
-        self.root.geometry('300x270')
+        # self.root = Tk()
+        # self.root.geometry('300x270')
 
-        button1 = Button(self.root, text = "O'Rielys Dungeon", width = 18, height = 2, command = self.world1)
+        # button1 = Button(self.root, text = "O'Rielys Dungeon", width = 18, height = 2, command = self.world1)
 
-        button2 = Button(self.root, text = "Advance Auto Parts Dungeon" , width = 18, height = 2, command = self.world2)
+        # button2 = Button(self.root, text = "Advance Auto Parts Dungeon" , width = 18, height = 2, command = self.world2)
 
-        button3 = Button(self.root, text = "Autozone Dungeon", width = 18, height = 2 , command = self.world3)
-        button1.place(x = 40, y = 15)
-        button2.place(x = 40, y = 65)
-        button3.place(x = 40, y = 115)
+        # button3 = Button(self.root, text = "Autozone Dungeon", width = 18, height = 2 , command = self.world3)
+        # button1.place(x = 40, y = 15)
+        # button2.place(x = 40, y = 65)
+        # button3.place(x = 40, y = 115)
 
-        self.root.eval('tk::PlaceWindow . center')
-        self.root.mainloop()
-
+        # self.root.eval('tk::PlaceWindow . center')
+        # self.root.mainloop()
+        # world = input('enter the world number')
+ 
+            self.world1()
+        
+            # self.world2()
 
     def world1(self):
-        self.root.destroy()
+        # self.root.destroy()
         pygame.time.set_timer(self.enemy_generation, 2000)
         button.imgdisp = 1
         castle.hide = True
         self.battle = True
-        background.bgimage = pygame.image.load("./RESOURCES/BACKGROUND/Background_world1.jpeg").convert_alpha()
-        ground.image = pygame.image.load("./RESOURCES/GROUND/ground_world1.png").convert_alpha()
+        # background.bgimage = pygame.image.load("./RESOURCES/BACKGROUND/Background_world1.jpeg").convert_alpha()
+        # ground.image = pygame.image.load("./RESOURCES/GROUND/ground_world1.png").convert_alpha()
 
 
     def world2(self):
-        self.root.destroy()
-        background.bgimage = pygame.image.load("./RESOURCES/BACKGROUND/background_world2.jpg").convert_alpha()
+        # self.root.destroy()
+        background.bgimage = pygame.image.load("./RESOURCES/BACKGROUND/world2background_full.png").convert_alpha()
         ground.image = pygame.image.load("./RESOURCES/GROUND/ground_world2.png").convert_alpha()
+        print('youve made it to world two')
 
         pygame.time.set_timer(self.enemy_generation2, 2500)
 
@@ -213,8 +219,10 @@ class EventHandler():
 
         #normalize background
         castle.hide = False
-        background.bgimage = pygame.image.load("./BACKRESOURCES/GROUND/wallpaper.png").convert_alpha()
-        ground.image = pygame.image.load("./RESOURCES/GROUND/ground.png").convert_alpha()
+        background.bgimage = pygame.image.load("./BACKRESOURCES/GROUND/background_scroll.png").convert_alpha()
+        ground.image = pygame.image.load("./RESOURCES/GROUND/ground_full.png").convert_alpha()
+        if event.key == pygame.K_k :
+            self.world2()
 
 
 class HealthBar(pygame.sprite.Sprite):
@@ -371,7 +379,7 @@ class FireBall(pygame.sprite.Sprite):
     def fire(self):
         player.magic_cooldown = 0
         #runs while on screen
-        if -10 < self.rect.x < 710:
+        if -10 < self.rect.x < 1920:
             if self.direction == "RIGHT":
                 self.image = pygame.image.load("./RESOURCES/PROJECTILE/fireball_R.png").convert_alpha()
                 displaysurface.blit(self.image, self.rect)
@@ -466,6 +474,15 @@ class Player(pygame.sprite.Sprite):
               self.acc.x += 2
           if self.direction == "LEFT":
               self.acc.x -=2
+      if pressed_keys[K_LSHIFT]:
+                  #   if self.direction == "RIGHT":
+            #   self.vel.y = 0
+              self.acc.y -= .5
+        #   if self.direction == "LEFT":
+        #       self.acc.x -=2
+    #   if pressed_keys[K_p]:
+    #       self.respawn()
+    #       HealthBar.render()
 
       self.acc.x += self.vel.x * FRIC
       self.vel += self.acc
@@ -593,6 +610,9 @@ class Player(pygame.sprite.Sprite):
                 self.kill()
             pygame.display.update()
 
+    def respawn(self):
+        self.health = 5
+        
 
 
 
@@ -629,10 +649,10 @@ class Enemy(pygame.sprite.Sprite):
         #initial position
         if self.direction == 0:
             self.pos.x = 0
-            self.pos.y =400
+            self.pos.y =900
         if self.direction == 1:
             self.pos.x = 900
-            self.pos.y = 400
+            self.pos.y = 900
 
 
     def move(self):
@@ -718,10 +738,10 @@ class Enemy2(pygame.sprite.Sprite):
         #sets initial position of enemy
         if self.direction == 0:
             self.pos.x = 0
-            self.pos.y = 250
+            self.pos.y = 900
         if self.direction == 1:
             self.pos.x = 700
-            self.pos.y = 250
+            self.pos.y = 900
 
 
     def move(self):
@@ -930,8 +950,8 @@ while True:
                 enemy = Enemy2()
                 Enemies.add(enemy)
                 handler.enemy_count += 1
-
-
+        
+        background.bgX -= player.vel.x
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
@@ -946,7 +966,7 @@ while True:
 
         # Event handling for a range of different key presses
         if event.type == pygame.KEYDOWN and cursor.wait == 0:
-              if event.key == pygame.K_k and 350 < player.rect.x < 550 and castle.hide == False:
+              if event.key == pygame.K_k and castle.hide == False:
                   print("open castle")
                   handler.stage_handler()
               if event.key == pygame.K_w:
@@ -990,6 +1010,10 @@ while True:
         player.attack()
     player.move()
 
+    if player.health <= 0:
+            player.respawn()
+            player.update()
+            health.render()
 
     if player.health > 0:
           displaysurface.blit(player.image, player.rect)
@@ -1020,7 +1044,7 @@ while True:
     # Status bar update and render
    # print(dir(EventHandler))
     #print(dir(status_bar))
-    displaysurface.blit(status_bar.surf, (580, 5))
+    displaysurface.blit(status_bar.surf, (1700, 5))
     status_bar.update_draw()
     handler.update()
 
