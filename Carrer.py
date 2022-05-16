@@ -832,10 +832,10 @@ class Bolt(pygame.sprite.Sprite):
         #runs while bolt is within the screen
         if -10 < self.rect.x < 710:
             if self.direction == 0:
-                self.image = pygame.image.load("./PROJECTILE/bolt.png").convert_alpha()
+                self.image = pygame.image.load("./RESOURCES/PROJECTILE/bolt.png").convert_alpha()
                 displaysurface.blit(self.image, self.rect)
             else:
-                self.image = pygame.image.load("./PROJECTILE/bolt_L.png").convert_alpha()
+                self.image = pygame.image.load("./RESOURCES/PROJECTILE/bolt_L.png").convert_alpha()
                 displaysurface.blit(self.image, self.rect)
 
             if self.direction == 0:
