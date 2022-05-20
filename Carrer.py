@@ -62,7 +62,7 @@ attack_ani_L = [pygame.image.load("./RESOURCES/HERO/Hero1_L.png").convert_alpha(
 
 health_ani = [pygame.image.load("./RESOURCES/HERO/tire0.png").convert_alpha(), pygame.image.load("./RESOURCES/HERO/tire1.png").convert_alpha(), pygame.image.load("./RESOURCES/HERO/tire2.png").convert_alpha(), pygame.image.load("./RESOURCES/HERO/tire3.png").convert_alpha(), pygame.image.load("./RESOURCES/HERO/tire4.png").convert_alpha(), pygame.image.load("./RESOURCES/HERO/tire5.png").convert_alpha()]
 
-
+mana_ani = [ pygame.image.load("./RESOURCES/HERO/manafull.png").convert_alpha(), pygame.image.load("./RESOURCES/HERO/manahalf.png").convert_alpha(), pygame.image.load("./RESOURCES/HERO/manaempty.png").convert_alpha()]
 
 
 
@@ -112,7 +112,39 @@ class Castle(pygame.sprite.Sprite):
         if self.hide == False:
             displaysurface.blit(self.image, (900,800))
 
+class Upgrades(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.hide = False
+        self.image = pygame.image.load("./RESOURCES/GAMEOBJECTS/ItalianWizard.png").convert_alpha()
+        self.wares = ['mana regen intercooler','double jump rims','hold velocity orb', 'fireball size+ spellbook', '2 hits per life body kit','bigass sword']
 
+    def update(self):
+        if self.hide == False:
+            displaysurface.blit(self.image, (1500,800))
+
+
+class Shopkeep(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.hide = True
+        self.image = pygame.image.load("./RESOURCES/ENEMY/death.gif")
+
+    def update(self):
+        if self.hide == False:
+            displaysurface.blit(self.image, (1500,600))
+
+class Ledge(pygame.sprite.Sprite):
+    def __init__(self,x,y,*args,**kwargs):
+        super().__init__()
+        self.x = x
+        self.y = y
+        self.hide = False
+        self.image = pygame.image.load('./RESOURCES/GROUND/smallledge.png') 
+        self.rect = self.image.get_rect(center = (self.x, self.y))
+
+    def render(self):
+        displaysurface.blit(self.image, (self.rect.x, self.rect.y))
 
 
 class EventHandler():
@@ -121,7 +153,7 @@ class EventHandler():
         self.battle = False
         self.enemy_generation = pygame.USEREVENT + 2
         self.enemy_generation2 = pygame.USEREVENT + 3
-        self.stage = 1
+        self.stage = 9
         self.dead_enemy_count = 0
         self.levelcomplete = False
         self.world = 0
@@ -171,9 +203,11 @@ class EventHandler():
         pygame.time.set_timer(self.enemy_generation, 2000)
         button.imgdisp = 1
         castle.hide = True
+        upgrades.hide = True
         self.battle = True
         # background.bgimage = pygame.image.load("./RESOURCES/BACKGROUND/Background_world1.jpeg").convert_alpha()
         # ground.image = pygame.image.load("./RESOURCES/GROUND/ground_world1.png").convert_alpha()
+        
 
 
     def world2(self):
@@ -186,12 +220,16 @@ class EventHandler():
 
         self.world = 2
         castle.hide = True
+        upgrades.hide = True
         self.battle = True
         button.imgdisp = 1
 
     def world3(self):
         self.battle = True
         button.imgdisp = 1
+
+
+
     def update(self):
         if self.dead_enemy_count == self.stage_enemies[self.stage -1]:
             self.dead_enemy_count = 0
@@ -211,7 +249,8 @@ class EventHandler():
         self.world = 0
         health.image = pygame.image.load("./RESOURCES/HERO/tire5.png").convert_alpha()
         player.health = 5
-
+        mana.image = pygame.image.load("./RESOURCES/HERO/manafull.png").convert_alpha()
+        player.mana = 100
         #destroy enemites and items
         for group in Enemies, Items:
             for entity in group:
@@ -219,11 +258,22 @@ class EventHandler():
 
         #normalize background
         castle.hide = False
-        background.bgimage = pygame.image.load("./BACKRESOURCES/GROUND/background_scroll.png").convert_alpha()
+        upgrades.hide = False
+        background.bgimage = pygame.image.load("./RESOURCES/BACKGROUND/background_scroll.png").convert_alpha()
         ground.image = pygame.image.load("./RESOURCES/GROUND/ground_full.png").convert_alpha()
-        if event.key == pygame.K_k :
-            self.world2()
+        # if event.key == pygame.K_k :
+        #     self.world2()
 
+    def openstore(self):
+        print('Oh Hello there, come on in dear boy. Would you care to take a look at my wares?')
+        background.bgimage = pygame.image.load("./RESOURCES/BACKGROUND/storeopen.png")
+        shopkeep.hide = False
+        displaysurface.blit(shopkeep.image, (900,600))
+        a = len(upgrades.wares)
+        print('today we have a fine selection including the', end=' ')
+        for i in range (0,a-1):
+            print(upgrades.wares[i], end=', ')
+        print(f'oh and of course we also carry the {upgrades.wares[a-1]}')
 
 class HealthBar(pygame.sprite.Sprite):
     def __init__(self):
@@ -233,6 +283,16 @@ class HealthBar(pygame.sprite.Sprite):
     def render(self):
         displaysurface.blit(self.image, (10,10))
 
+
+class ManaBar(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.image.load("./RESOURCES/HERO/manafull.png").convert_alpha()
+        self.surf = pygame.Surface((90,66))
+        self.rect = self.surf.get_rect(center = (500,10))
+
+    def render(self):
+        displaysurface.blit(self.image, (900,10))
 
 
 
@@ -321,6 +381,14 @@ class Item(pygame.sprite.Sprite):
                 player.souls += 1
                 self.kill()
 
+        if player.mana > 70:
+            mana.image = mana_ani[0]
+        elif 70 > player.mana > 30:
+            mana.image = mana_ani[1]
+        else: mana.image = mana_ani[2]
+
+
+
 
 
 class PButton(pygame.sprite.Sprite):
@@ -379,6 +447,7 @@ class FireBall(pygame.sprite.Sprite):
     def fire(self):
         player.magic_cooldown = 0
         #runs while on screen
+        hits = pygame.sprite.spritecollide(ball,enemygroup, False)
         if -10 < self.rect.x < 1920:
             if self.direction == "RIGHT":
                 self.image = pygame.image.load("./RESOURCES/PROJECTILE/fireball_R.png").convert_alpha()
@@ -397,6 +466,11 @@ class FireBall(pygame.sprite.Sprite):
             else:
                 self.rect.move_ip(-12,0)
 
+        elif   hits:
+            self.kill()
+            player.attacking = False
+              
+        
         else:
             self.kill()
             player.magic_cooldown = 1
@@ -430,7 +504,7 @@ class FireBall(pygame.sprite.Sprite):
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.image.load("./RESOURCES/HERO/Hero1.png").convert_alpha()
+        self.image = pygame.image.load("./RESOURCES/HERO/Hero_bigasssword.png").convert_alpha()
         self.rect = self.image.get_rect()
         #Combat
         self.attacking = False
@@ -450,11 +524,22 @@ class Player(pygame.sprite.Sprite):
         self.ducking = False
         self.lasttime = pygame.time.get_ticks()
         self.health = 5
-        self.mana = 0
+        self.mana = 30
         self.xp = 0
         self.souls = 0
 
 
+
+        #functionality
+        self.hitcounter = 0
+
+        #upgrades
+        self.doublejump = 1
+        self.velocityorb = 1
+        self.armour = 1
+        self.cheapballs = 1     #and double mana
+        self.bigasssword = 0
+        self.tier2magik = 0
     def move(self):
       if cursor.wait ==1: return
       #will set to slow if player is slowed down
@@ -462,7 +547,7 @@ class Player(pygame.sprite.Sprite):
       if abs(self.vel.x) > .3:
           self.running = True
       else:
-          self.runnign = False
+          self.running = False
       pressed_keys = pygame.key.get_pressed()
 
       if pressed_keys[K_a]:
@@ -474,10 +559,11 @@ class Player(pygame.sprite.Sprite):
               self.acc.x += 2
           if self.direction == "LEFT":
               self.acc.x -=2
-      if pressed_keys[K_LSHIFT]:
-                  #   if self.direction == "RIGHT":
-            #   self.vel.y = 0
-              self.acc.y -= .5
+      if player.velocityorb:
+        if pressed_keys[K_LSHIFT]:
+                    #   if self.direction == "RIGHT":
+                #   self.vel.y = 0
+                self.acc.y -= .5
         #   if self.direction == "LEFT":
         #       self.acc.x -=2
     #   if pressed_keys[K_p]:
@@ -504,7 +590,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x -=1
 
         #if touching ground and not jumping jump
-        if hits and not self.jumping:
+        if ((hits and not self.jumping )or self.doublejump):
 
             self.jumping = True
             self.vel.y = -18
@@ -518,6 +604,8 @@ class Player(pygame.sprite.Sprite):
             self.ducking = True
         else:
             self.ducking = False
+
+        self.mana += 25
 
 
     def gravity_check(self):
@@ -597,15 +685,19 @@ class Player(pygame.sprite.Sprite):
 
 
     def player_hit(self):
+
         if self.cooldown == False:
             self.cooldown = True #enables cooldown
             pygame.time.set_timer(hit_cooldown, 1000) #resets cooldown
-
+            self.hitcounter +=1
             print("hit")
-
-            self.health = self.health -1
-            health.image = health_ani[self.health]
-
+            if self.armour:
+                if self.hitcounter % 2 == 0:
+                    self.health = self.health - 1
+                    health.image = health_ani[self.health]
+            else:
+                self.health = self.health - 1
+                health.image = health_ani[self.health]
             if self.health <= 0:
                 self.kill()
             pygame.display.update()
@@ -642,6 +734,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.pos = vec(0,0)
         self.vel = vec(0,0)
+        self.isdead = 0
 
         self.direction = random.randint(0,1) #0 for right 1 for left
         self.vel.x = random.randint(2,6) /2  #rand velocity
@@ -688,9 +781,17 @@ class Enemy(pygame.sprite.Sprite):
 
         if hits and player.attacking == True or f_hits:
             print("Enemy killed")
-            if player.mana < 100: player.mana += self.mana
-            player.xp += 1
-            self.kill()
+            enemygroup.remove(self)
+            self.isdead = 1
+            if player.cheapballs:
+                if player.mana < 200: player.mana += self.mana
+                player.xp += 1
+                self.kill()
+
+            else:
+                if player.mana < 100: player.mana += self.mana
+                player.xp += 1
+                self.kill()
 
             rand_num = numpy.random.uniform(0,100)
             item_no = 0
@@ -726,7 +827,7 @@ class Enemy2(pygame.sprite.Sprite):
         self.wait = 0
         self.wait_status = False
         self.turning = 0
-
+        self.isdead = 0
         self.direction = random.randint(0,1)    #0 for right
         self.vel.x = random.randint(2,6) / 3    # random velocity
         self.mana = random.randint(2,3)         #random mana
@@ -789,6 +890,7 @@ class Enemy2(pygame.sprite.Sprite):
 
         #if either of the above is true
         if hits and player.attacking == True or f_hits:
+            self.isdead = 1
             self.kill()
             handler.dead_enemy_count += 1
 
@@ -887,9 +989,11 @@ class Bolt(pygame.sprite.Sprite):
 
 
 
-
-
-
+ledge1= Ledge(150,200)
+ledge2 = Ledge(1850,200)
+ledge3 = Ledge(300,900)
+ledges = [ledge1,ledge2,ledge3]
+shopkeep = Shopkeep()
 background = Background()
 ground = Ground()
 player=Player()
@@ -897,17 +1001,18 @@ playergroup = pygame.sprite.Group()
 playergroup.add(player)
 ground_group = pygame.sprite.Group()
 ground_group.add(ground)
-
+for i in ledges: ground_group.add(i)
 Fireballs = pygame.sprite.Group()
 
 castle = Castle()
+upgrades = Upgrades()
 handler = EventHandler()
 
 Enemies = pygame.sprite.Group()
 
 
 health = HealthBar()
-
+mana = ManaBar()
 
 status_bar = StatusBar()
 
@@ -922,7 +1027,7 @@ cursor = Cursor()
 
 Bolts = pygame.sprite.Group()
 
-
+enemygroup = pygame.sprite.Group()
 
 
 
@@ -943,12 +1048,14 @@ while True:
             while handler.enemy_count < handler.stage_enemies[handler.stage -1]:
                 enemy = Enemy()
                 Enemies.add(enemy)
+                enemygroup.add(enemy)
                 handler.enemy_count +=  1#handler.stage_enemies[handler.stage -1] - handler.enemy_count
 
         if event.type == handler.enemy_generation2:
             if handler.enemy_count < handler.stage_enemies[handler.stage -1]:
                 enemy = Enemy2()
                 Enemies.add(enemy)
+                enemygroup.add(enemy)
                 handler.enemy_count += 1
         
         background.bgX -= player.vel.x
@@ -969,6 +1076,10 @@ while True:
               if event.key == pygame.K_k and castle.hide == False:
                   print("open castle")
                   handler.stage_handler()
+              if event.key == pygame.K_u and upgrades.hide == False:
+                  player.image = pygame.image.load('./RESOURCES/HERO/Hero_bigasssword.png')
+                  print("open upgrades")
+                  handler.openstore()
               if event.key == pygame.K_w:
                   player.jump()
               if event.key == pygame.K_j:
@@ -980,21 +1091,30 @@ while True:
               if event.key == pygame.K_m:
                   print("stage enemies[handler.stage -1] " ,handler.stage_enemies[handler.stage -1] , " dead_enemy_count " , handler.dead_enemy_count, "levelcomplete ", handler.levelcomplete, "enemy count ", handler.enemy_count)
                   #print( "stage enemies " , handler.stage_enemies ,"genration ", handler.enemy_generation, "Enemies ", Enemies)
-              if event.key == pygame.K_n:
+            #   if event.key == pygame.K_n:
 
-                  if handler.battle == True and handler.levelcomplete == True:
-                      handler.next_stage()
-                      stage_display = StageDisplay()
-                      stage_display.display = True
-                      handler.levelcomplete = False
+              if handler.battle == True and handler.levelcomplete == True:
+                  handler.next_stage()
+                  stage_display = StageDisplay()
+                  stage_display.display = True
+                  handler.levelcomplete = False
+
+              if handler.stage >= 10:
+                  handler.stage = 1
+                  handler.world2()
 
               if event.key == pygame.K_l: # and player.magic_cooldown == 1
-       #           if player.mana >= 6:
-        #              player.mana -= 6
-                      player.attacking = True
-                      fireball = FireBall()
-                      Fireballs.add(fireball)
-
+                  if player.mana >=6:
+                    if ( player.cheapballs):
+                        player.mana -= 3
+                        player.attacking = True
+                        fireball = FireBall()
+                        Fireballs.add(fireball)
+                    else:
+                        player.mana -= 6
+                        player.attacking = True
+                        fireball = FireBall()
+                        Fireballs.add(fireball)
 
 
 
@@ -1003,7 +1123,7 @@ while True:
     button.render(button.imgdisp)
     cursor.hover()
     castle.update()
-
+    upgrades.update()
     player.update()
 
     if player.attacking == True:
@@ -1011,13 +1131,14 @@ while True:
     player.move()
 
     if player.health <= 0:
-            player.respawn()
-            player.update()
-            health.render()
+            exit()
 
     if player.health > 0:
           displaysurface.blit(player.image, player.rect)
     health.render()
+    mana.render()
+
+
     for ball in Fireballs:
         ball.fire()
     for bolt in Bolts:
@@ -1027,6 +1148,11 @@ while True:
             entity.update()
             entity.move()
             entity.render()
+            if entity.isdead == False:
+                enemygroup.add(entity)
+            if entity.isdead:
+                enemygroup.remove(entity)
+
 
     # Render stage display
     if stage_display.display == True:
@@ -1039,6 +1165,8 @@ while True:
         i.render()
         i.update()
 
+    for ledge in ledges:
+        ledge.render()
 
 
     # Status bar update and render
